@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}{% if dept.pk %}{{ dept.name }}{% else %}Add department{% endif %}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'admin_area:departments' %}">Departments</a> / {{ dept.name|default:"New" }}</div>
+<h1>{% if dept.pk %}Edit {{ dept.name }}{% else %}Add department{% endif %}</h1>
+<form method="post" class="card" style="max-width:640px">{% csrf_token %}{% include "components/form_errors.html" %}
+{% for field in form %}{% include "components/field.html" %}{% endfor %}
+<div class="btn-row"><button class="btn" type="submit">Save</button><a class="btn secondary" href="{% url 'admin_area:departments' %}">Cancel</a></div></form>
+{% endblock %}

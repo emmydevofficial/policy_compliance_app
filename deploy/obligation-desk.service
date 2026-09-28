@@ -1,0 +1,25 @@
+# /etc/systemd/system/obligation-desk.service
+[Unit]
+Description=Obligation Desk (gunicorn)
+After=network.target
+
+[Service]
+Type=notify
+User=obligationdesk
+Group=obligationdesk
+WorkingDirectory=/srv/obligation-desk/app
+EnvironmentFile=/srv/obligation-desk/app/.env
+Environment=DJANGO_SETTINGS_MODULE=config.settings.prod
+ExecStart=/srv/obligation-desk/app/.venv/bin/gunicorn config.wsgi:application \
+    --bind unix:/run/obligation-desk/gunicorn.sock --workers 3 --timeout 120 \
+    --access-logfile - --error-logfile -
+RuntimeDirectory=obligation-desk
+UMask=0027
+Restart=on-failure
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/srv/obligation-desk/data /srv/obligation-desk/private_media /srv/obligation-desk/cache
+
+[Install]
+WantedBy=multi-user.target

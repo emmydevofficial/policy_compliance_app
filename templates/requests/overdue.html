@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% load od %}{% block title %}Overdue and escalations{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Overdue and escalations</h1><p>{{ items|length }} request{{ items|length|pluralize }} past the deadline.</p></div></div>
+<div class="table-wrap"><table><thead><tr><th>ID</th><th>Department</th><th>Risk</th><th>Deadline</th><th>Overdue</th><th>Notices</th><th>GM escalated</th><th>Management</th><th>Status</th></tr></thead><tbody>
+{% for r in items %}<tr><td><a class="oid" href="{% url 'requests:detail' r.pk %}">{{ r.obligation.obligation_id }}</a></td><td>{{ r.assigned_department.name }}</td><td>{% with ob=r.obligation %}{% include "components/risk.html" %}{% endwith %}</td><td class="num">{{ r.due_date|date:"d M Y" }}</td><td class="num">{{ r.days_overdue }} d</td><td class="num">{{ r.notices }}</td><td>{{ r.escalated_to_gm_at|date:"d M Y"|default:"—" }}</td><td>{{ r.escalated_to_management_at|date:"d M Y"|default:"—" }}</td><td>{% include "components/status.html" %}</td></tr>
+{% empty %}<tr><td colspan="9" class="muted">Nothing is overdue.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

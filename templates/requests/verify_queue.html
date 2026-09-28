@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% load od %}{% block title %}Verification queue{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Verification queue</h1><p>{{ items|length }} submission{{ items|length|pluralize }} awaiting verification, oldest first.</p></div></div>
+{% for req, s in items %}
+<article class="req-card review">
+  <header><h2><a class="oid" href="{% url 'requests:detail' req.pk %}">{{ req.obligation.obligation_id }}</a> · {{ req.assigned_department.name }}</h2>
+  <span><span class="badge {{ s.compliance_css }}">{{ s.get_compliance_status_display }}</span> {% with ob=req.obligation %}{% include "components/risk.html" %}{% endwith %}</span></header>
+  <p class="small muted">Submitted {{ s.submitted_at|date:"d M Y H:i" }} by {{ s.submitted_by.full_name }} · deadline {{ req.due_date|date:"d M Y" }}</p>
+  <div class="grid grid-2">
+    <div><h3>Evidence required</h3><ul>{% for e in req.evidence_required|items %}<li>{{ e }}</li>{% endfor %}</ul></div>
+    <div><h3>Files attached</h3>{% with files=s.attachments.all kind="evidence" %}{% include "components/files.html" %}{% endwith %}
+      <p><strong>Evidence available:</strong> {{ s.get_evidence_available_display }}. {{ s.evidence_description }}</p>
+      {% if s.action_required %}<p><strong>Action plan:</strong> {{ s.action_required }} — {{ s.action_owner }}, by {{ s.target_resolution_date|date:"d M Y" }}</p>{% endif %}
+      {% if s.remarks %}<p><strong>Remarks:</strong> {{ s.remarks }}</p>{% endif %}</div>
+  </div>
+  <form method="post" action="{% url 'requests:verify' s.pk %}">{% csrf_token %}
+    <div class="field"><label for="c-{{ s.pk }}">Comment</label><textarea id="c-{{ s.pk }}" name="comment" rows="2" placeholder="Required when returning"></textarea></div>
+    <div class="btn-row"><button class="btn" name="decision" value="verify">Verify</button><button class="btn danger" name="decision" value="return">Return with reason</button></div>
+  </form>
+</article>
+{% empty %}<div class="card"><p class="muted">Nothing is waiting for verification.</p></div>{% endfor %}
+{% endblock %}

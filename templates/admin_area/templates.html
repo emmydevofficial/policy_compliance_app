@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Email templates{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Email templates</h1><p>Editing a template changes future notices only. Notices already sent keep their wording.</p></div></div>
+<div class="table-wrap"><table><thead><tr><th>Template</th><th>Key</th><th>Subject</th><th>Status</th><th>Last edited</th></tr></thead><tbody>
+{% for t in templates %}<tr><td><a href="{% url 'admin_area:template_edit' t.pk %}">{{ t.name }}</a></td><td class="mono">{{ t.key }}</td><td class="small">{{ t.subject_template }}</td><td>{% if t.is_active %}<span class="badge accent">Active</span>{% else %}<span class="badge na">Off</span>{% endif %}</td><td class="num">{{ t.updated_at|date:"d M Y" }}</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

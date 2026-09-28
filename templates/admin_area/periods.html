@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}Reporting periods{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Reporting periods</h1><p>Exactly one period is open at a time. Closing a period makes its requests read-only for everyone.</p></div></div>
+<div class="grid grid-2">
+<div class="table-wrap"><table><thead><tr><th>Period</th><th>From</th><th>To</th><th>Status</th><th></th></tr></thead><tbody>
+{% for p in periods %}<tr><td>{{ p.name }}</td><td class="num">{{ p.start_date|date:"d M Y" }}</td><td class="num">{{ p.end_date|date:"d M Y" }}</td><td>{% if p.is_open %}<span class="badge accent">Open</span>{% else %}<span class="badge na">Closed</span>{% endif %}</td>
+<td><form method="post" action="{% url 'admin_area:period_toggle' p.pk %}" data-confirm="{% if p.is_open %}Close {{ p.name }}? Its requests become read-only.{% else %}Open {{ p.name }}?{% endif %}">{% csrf_token %}<button class="btn {% if p.is_open %}danger{% else %}secondary{% endif %} small">{% if p.is_open %}Close{% else %}Open{% endif %}</button></form></td></tr>
+{% empty %}<tr><td colspan="5" class="muted">No periods.</td></tr>{% endfor %}</tbody></table></div>
+<form method="post" class="card">{% csrf_token %}<h2>Add a period</h2>{% include "components/form_errors.html" %}{% for field in form %}{% include "components/field.html" %}{% endfor %}<button class="btn" type="submit">Add period</button></form>
+</div>
+{% endblock %}

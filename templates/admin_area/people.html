@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}People{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>People</h1><p>{{ page.paginator.count }} {{ show }} {{ page.paginator.count|pluralize:"person,people" }}.</p></div>
+<div class="btn-row"><a class="btn secondary" href="{% url 'admin_area:people_import' %}">Import from CSV</a><a class="btn" href="{% url 'admin_area:person_create' %}">Add person</a></div></div>
+<form method="get" class="card filters">
+  <div class="field"><label for="q">Search</label><input type="search" id="q" name="q" value="{{ q }}" placeholder="Name, email or job title"></div>
+  <div class="field"><label for="role">Role</label><select id="role" name="role"><option value="">All roles</option>{% for v, l in roles %}<option value="{{ v }}" {% if role == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="department">Department</label><select id="department" name="department"><option value="">All</option>{% for d in departments %}<option value="{{ d.pk }}" {% if department == d.pk|stringformat:'s' %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="show">Show</label><select id="show" name="show"><option value="active" {% if show == 'active' %}selected{% endif %}>Active</option><option value="inactive" {% if show == 'inactive' %}selected{% endif %}>Deactivated</option><option value="all" {% if show == 'all' %}selected{% endif %}>All</option></select></div>
+  <div><button class="btn secondary">Filter</button></div>
+</form>
+<div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Last sign-in</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+{% for p in page %}<tr><td><a href="{% url 'admin_area:person_edit' p.pk %}">{{ p.full_name }}</a>{% if p.job_title %}<br><span class="small muted">{{ p.job_title }}</span>{% endif %}</td><td>{{ p.email }}</td><td>{{ p.get_role_display }}{% if p.is_department_gm %} · GM{% endif %}</td><td>{{ p.department.name|default:"—" }}</td><td class="num">{{ p.last_login|date:"d M Y"|default:"Never" }}</td>
+<td>{% if p.is_active %}<span class="badge accent">Active</span>{% else %}<span class="badge na">Deactivated</span>{% endif %}</td>
+<td class="btn-row"><a class="btn secondary small" href="{% url 'admin_area:person_edit' p.pk %}">Edit</a>
+{% if p.is_active %}<form method="post" action="{% url 'admin_area:person_invite' p.pk %}">{% csrf_token %}<button class="btn secondary small">Send activation link</button></form>{% if p != user %}<a class="btn danger small" href="{% url 'admin_area:person_deactivate' p.pk %}">Deactivate</a>{% endif %}
+{% else %}<form method="post" action="{% url 'admin_area:person_reactivate' p.pk %}">{% csrf_token %}<button class="btn secondary small">Reactivate</button></form>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="7" class="muted">No one matches.</td></tr>{% endfor %}
+</tbody></table></div>
+{% if page.has_other_pages %}<nav class="pagination" aria-label="Pages">{% if page.has_previous %}<a class="btn secondary small" href="?page={{ page.previous_page_number }}&q={{ q|urlencode }}&role={{ role }}&department={{ department }}&show={{ show }}">Previous</a>{% endif %}<span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a class="btn secondary small" href="?page={{ page.next_page_number }}&q={{ q|urlencode }}&role={{ role }}&department={{ department }}&show={{ show }}">Next</a>{% endif %}</nav>{% endif %}
+{% endblock %}

@@ -1,0 +1,2 @@
+{% extends "base.html" %}{% block title %}Not allowed{% endblock %}
+{% block content %}<div class="card"><h1>You do not have access to this page</h1><p>Your role does not allow this, or the item belongs to another department.</p><a class="btn secondary" href="{% url 'home' %}">Go to my start page</a></div>{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% load od %}{% block title %}Audit log{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Audit log</h1><p>Append-only. {{ page.paginator.count }} event{{ page.paginator.count|pluralize }} match.</p></div></div>
+<form method="get" class="card filters">
+  <div class="field"><label for="actor">Actor</label><select id="actor" name="actor"><option value="">Anyone</option><option value="system" {% if params.actor == 'system' %}selected{% endif %}>System</option>{% for a in actors %}<option value="{{ a.pk }}" {% if params.actor == a.pk|stringformat:'s' %}selected{% endif %}>{{ a.full_name }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="action">Action</label><select id="action" name="action"><option value="">Any action</option>{% for a in actions %}<option value="{{ a }}" {% if params.action == a %}selected{% endif %}>{{ a|action_label }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="obligation">Obligation ID</label><input type="text" id="obligation" name="obligation" value="{{ params.obligation }}" placeholder="LIC-001"></div>
+  <div class="field"><label for="from">From</label><input type="date" id="from" name="from" value="{{ params.from }}"></div>
+  <div class="field"><label for="to">To</label><input type="date" id="to" name="to" value="{{ params.to }}"></div>
+  <div class="btn-row"><button class="btn">Filter</button><a class="btn secondary" href="{% url 'admin_area:audit' %}">Clear</a></div>
+</form>
+<div class="table-wrap"><table><thead><tr><th>When (Lagos)</th><th>Actor</th><th>Action</th><th>Object</th><th>Obligation</th><th>Detail</th><th>Address</th></tr></thead><tbody>
+{% for e in page %}<tr><td class="num">{{ e.occurred_at|date:"d M Y H:i:s" }}</td><td>{{ e.actor_label }}</td><td>{{ e.action|action_label }}</td><td class="small">{{ e.object_type }} {{ e.object_id }}</td><td class="mono">{{ e.obligation_ref }}</td><td class="desc small">{{ e.detail }}</td><td class="mono small">{{ e.ip_address|default:"" }}</td></tr>
+{% empty %}<tr><td colspan="7" class="muted">No events.</td></tr>{% endfor %}</tbody></table></div>
+{% if page.has_other_pages %}<nav class="pagination" aria-label="Pages">{% if page.has_previous %}<a class="btn secondary small" href="?{{ query }}&page={{ page.previous_page_number }}">Newer</a>{% endif %}<span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a class="btn secondary small" href="?{{ query }}&page={{ page.next_page_number }}">Older</a>{% endif %}</nav>{% endif %}
+{% endblock %}

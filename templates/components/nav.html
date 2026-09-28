@@ -1,0 +1,34 @@
+{% with ns=request.resolver_match.namespace url=request.resolver_match.url_name %}
+<nav class="nav" aria-label="Main">
+{% if current_role == "ADMIN" %}
+  <div class="nav-section">Overview</div>
+  <a href="{% url 'dashboard:admin' %}" {% if ns == 'dashboard' %}aria-current="page"{% endif %}>Compliance dashboard</a>
+  <a href="{% url 'obligations:list' %}" {% if ns == 'obligations' %}aria-current="page"{% endif %}>Obligation register</a>
+  <div class="nav-section">Evidence</div>
+  <a href="{% url 'requests:list' %}" {% if ns == 'requests' and url == 'list' or url == 'detail' and ns == 'requests' %}aria-current="page"{% endif %}>Evidence requests</a>
+  <a href="{% url 'requests:create' %}" {% if url == 'create' %}aria-current="page"{% endif %}>New request</a>
+  <a href="{% url 'requests:verify_queue' %}" {% if url == 'verify_queue' %}aria-current="page"{% endif %}>Verification queue</a>
+  <a href="{% url 'requests:overdue' %}" {% if url == 'overdue' %}aria-current="page"{% endif %}>Overdue and escalations</a>
+  <a href="{% url 'reports:index' %}" {% if ns == 'reports' %}aria-current="page"{% endif %}>Reports and export</a>
+  <div class="nav-section">Administration</div>
+  <a href="{% url 'admin_area:departments' %}" {% if url|slice:':10' == 'department' %}aria-current="page"{% endif %}>Departments</a>
+  <a href="{% url 'admin_area:people' %}" {% if url|slice:':6' == 'person' or url|slice:':6' == 'people' %}aria-current="page"{% endif %}>People</a>
+  <a href="{% url 'admin_area:periods' %}" {% if url == 'periods' %}aria-current="page"{% endif %}>Reporting periods</a>
+  <a href="{% url 'admin_area:reminders' %}" {% if url == 'reminders' %}aria-current="page"{% endif %}>Reminder rules</a>
+  <a href="{% url 'admin_area:templates' %}" {% if url|slice:':8' == 'template' %}aria-current="page"{% endif %}>Email templates</a>
+  <a href="{% url 'admin_area:audit' %}" {% if url == 'audit' %}aria-current="page"{% endif %}>Audit log</a>
+{% elif current_role == "OFFICER" %}
+  <div class="nav-section">My work</div>
+  <a href="{% url 'my:inbox' %}" {% if url == 'inbox' or url == 'submit' %}aria-current="page"{% endif %}>My obligations</a>
+  <a href="{% url 'my:history' %}" {% if url == 'history' %}aria-current="page"{% endif %}>Submission history</a>
+  <a href="{% url 'my:settings' %}" {% if url == 'settings' %}aria-current="page"{% endif %}>Notification settings</a>
+  <div class="nav-section">Reference</div>
+  <a href="{% url 'obligations:list' %}" {% if ns == 'obligations' %}aria-current="page"{% endif %}>Obligation register</a>
+{% elif current_role == "EXECUTIVE" %}
+  <div class="nav-section">Overview</div>
+  <a href="{% url 'dashboard:executive' %}" {% if ns == 'dashboard' %}aria-current="page"{% endif %}>Executive summary</a>
+  <a href="{% url 'obligations:list' %}" {% if ns == 'obligations' %}aria-current="page"{% endif %}>Obligation register</a>
+  <a href="{% url 'reports:index' %}" {% if ns == 'reports' %}aria-current="page"{% endif %}>Reports</a>
+{% endif %}
+</nav>
+{% endwith %}

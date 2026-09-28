@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% block title %}{{ tpl.name }}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'admin_area:templates' %}">Email templates</a> / {{ tpl.name }}</div>
+<h1>{{ tpl.name }} <span class="mono small muted">{{ tpl.key }}</span></h1>
+<div class="grid grid-2">
+<form method="post" class="card" id="template-form">{% csrf_token %}{% include "components/form_errors.html" %}
+  {% for field in form %}{% include "components/field.html" %}{% endfor %}
+  <p class="small">Placeholders: {% for p in placeholders %}<code>{% templatetag openvariable %} {{ p }} {% templatetag closevariable %}</code> {% endfor %}{% if digest %}<code>{% templatetag openvariable %} {{ digest_placeholder }} {% templatetag closevariable %}</code>{% endif %}</p>
+  <div class="btn-row"><button class="btn" type="submit">Save template</button><a class="btn secondary" href="{% url 'admin_area:templates' %}">Cancel</a></div>
+</form>
+<div class="card"><h2>Preview</h2>
+  <div hx-post="{% url 'admin_area:template_preview' tpl.pk %}" hx-include="#template-form" hx-trigger="load, keyup delay:500ms from:#template-form" hx-target="this" hx-swap="innerHTML"><p class="muted">Loading preview…</p></div>
+</div></div>
+{% endblock %}

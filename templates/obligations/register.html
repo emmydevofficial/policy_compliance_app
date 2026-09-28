@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block title %}Obligation register{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Obligation register</h1><p>All active obligations across the regulatory instruments.</p></div>
+{% if current_role == "ADMIN" %}<a class="btn secondary" href="{% url 'reports:register_xlsx' %}">Export to Excel</a>{% endif %}</div>
+<form class="card filters" method="get" action="{% url 'obligations:list' %}"
+      hx-get="{% url 'obligations:list' %}" hx-target="#register-results" hx-swap="innerHTML"
+      hx-trigger="change, input from:#q delay:350ms, submit" hx-push-url="true" hx-indicator="#register-spinner">
+  <div class="field"><label for="q">Search</label><input type="search" id="q" name="q" value="{{ params.q }}" placeholder="ID, text, category or reference"></div>
+  <div class="field"><label for="f-inst">Instrument</label><select id="f-inst" name="instrument"><option value="">All instruments</option>{% for i in instruments %}<option value="{{ i.pk }}" {% if params.instrument == i.pk|stringformat:'s' %}selected{% endif %}>{{ i.name }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="f-dept">Department</label><select id="f-dept" name="department"><option value="">All departments</option>{% for d in departments %}<option value="{{ d.pk }}" {% if params.department == d.pk|stringformat:'s' %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="f-risk">Risk</label><select id="f-risk" name="risk"><option value="">All risk levels</option>{% for v, l in risks %}<option value="{{ v }}" {% if params.risk == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="f-status">Current status</label><select id="f-status" name="status"><option value="">Any status</option>{% for v, l in statuses %}<option value="{{ v }}" {% if params.status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="btn-row"><button class="btn" type="submit">Apply</button><a class="btn secondary" href="{% url 'obligations:list' %}">Clear</a><span id="register-spinner" class="htmx-indicator muted small">Updating…</span></div>
+</form>
+<div id="register-results">{% include "components/register_rows.html" %}</div>
+{% endblock %}

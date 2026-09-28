@@ -1,0 +1,7 @@
+<div class="checklist" id="obligation-checklist">
+{% for ob in available %}
+  <label><input type="checkbox" name="obligations" value="{{ ob.pk }}" {% if ob.pk in selected %}checked{% endif %}>
+  <span><span class="oid">{{ ob.obligation_id }}</span> · {{ ob.primary_department.name }} · <span class="badge {{ ob.risk_css }}">{{ ob.get_risk_level_display }}</span><br><span class="small">{{ ob.description|truncatechars:160 }}</span></span></label>
+{% empty %}<p class="muted">Every active obligation already has a request this period.</p>
+{% endfor %}
+</div>

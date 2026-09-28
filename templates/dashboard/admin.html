@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% load od %}{% block title %}Compliance dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Compliance dashboard</h1><p>{{ s.period.name|default:"No open period" }} · {{ s.rows|length }} active obligations</p></div>{% include "dashboard/_period.html" %}</div>
+<div class="stats">
+  <a class="stat bad" href="{% url 'requests:overdue' %}" style="color:inherit;text-decoration:none"><div class="label">Overdue</div><div class="value">{{ s.overdue }}</div></a>
+  <div class="stat warn"><div class="label">Due within 7 days</div><div class="value">{{ s.due_soon }}</div></div>
+  <a class="stat review" href="{% url 'requests:verify_queue' %}" style="color:inherit;text-decoration:none"><div class="label">Awaiting verification</div><div class="value">{{ s.awaiting_verification }}</div></a>
+  <div class="stat accent"><div class="label">High risk obligations</div><div class="value">{{ s.high_risk }}</div></div>
+</div>
+<div class="card"><h2>Compliance position</h2>
+<div class="stats">{% for key, label, css, n in s.positions %}<div class="stat {{ css }}"><div class="label">{{ label }}</div><div class="value">{{ n }}</div></div>{% endfor %}</div></div>
+<div class="card"><h2>High risk and overdue</h2>
+<div class="table-wrap"><table><thead><tr><th>ID</th><th>Department</th><th>Deadline</th><th>Overdue</th><th>Consequence</th></tr></thead><tbody>
+{% for r in s.high_risk_overdue %}<tr><td><a class="oid" href="{% url 'requests:detail' r.req.pk %}">{{ r.ob.obligation_id }}</a></td><td>{{ r.req.assigned_department.name }}</td><td class="num">{{ r.req.due_date|date:"d M Y" }}</td><td><span class="badge bad">{{ r.req.due_date|countdown }}</span></td><td class="desc small">{{ r.ob.consequence|truncatechars:140 }}</td></tr>
+{% empty %}<tr><td colspan="5" class="muted">No High risk items are overdue.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="grid grid-2">
+<div class="card"><h2>By department</h2>{% include "dashboard/_breakdown.html" with rows=s.by_department %}</div>
+<div class="card"><h2>By instrument</h2>{% include "dashboard/_breakdown.html" with rows=s.by_instrument %}</div>
+</div>
+{% endblock %}

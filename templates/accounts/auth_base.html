@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="auth-wrap"><div class="auth-card card">
+  <a class="brand" href="{% url 'accounts:login' %}"><span class="brand-mark" aria-hidden="true"></span>Obligation Desk</a>
+  {% if messages %}<ul class="messages">{% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>{% endif %}
+  {% block auth %}{% endblock %}
+</div></main>
+{% endblock %}

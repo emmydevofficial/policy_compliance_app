@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>{{ subject }}</title></head>
+<body style="margin:0;padding:0;background:#F2F6F7;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F2F6F7;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background:#FFFFFF;border:1px solid #CFDDE1;">
+  <tr><td style="background:#00849E;padding:16px 24px;font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:bold;color:#FFFFFF;">Obligation Desk</td></tr>
+  <tr><td style="padding:24px 24px 8px;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:bold;color:#0F2429;">{{ subject }}</td></tr>
+  <tr><td style="padding:0 24px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:22px;color:#0F2429;">
+    {% for p in paragraphs %}<p style="margin:0 0 14px;">{{ p|linebreaksbr }}</p>{% endfor %}
+  </td></tr>
+  {% if has_obligation %}
+  <tr><td style="padding:8px 24px 16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #B3C8CE;border-left:4px solid #00849E;background:#E8F0F2;">
+      <tr><td style="padding:12px 14px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:20px;color:#0F2429;">
+        <strong>{{ ctx.obligation_id }}</strong> · {{ ctx.instrument }} · {{ ctx.document_reference }} · Risk: {{ ctx.risk_level }}<br>
+        {{ ctx.obligation_text }}
+      </td></tr>
+    </table>
+  </td></tr>
+  {% if ctx.deadline %}<tr><td style="padding:0 24px 16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#0F2429;">Deadline: <strong>{{ ctx.deadline }}</strong></td></tr>{% endif %}
+  {% endif %}
+  {% if ctx.upload_link %}
+  <tr><td style="padding:0 24px 24px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="background:#00849E;padding:12px 22px;"><a href="{{ ctx.upload_link }}" style="font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:bold;color:#FFFFFF;text-decoration:none;">Open in Obligation Desk</a></td>
+    </tr></table>
+  </td></tr>
+  {% endif %}
+  {% if ctx.consequence %}
+  <tr><td style="padding:14px 24px;border-top:1px solid #CFDDE1;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:18px;color:#42585F;">Consequence of breach: {{ ctx.consequence }}</td></tr>
+  {% endif %}
+</table>
+</td></tr>
+</table>
+</body></html>

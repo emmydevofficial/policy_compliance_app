@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}Deactivate {{ person.full_name }}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'admin_area:people' %}">People</a> / {{ person.full_name }}</div>
+<h1>Deactivate {{ person.full_name }}</h1>
+<form method="post" class="card" style="max-width:720px">{% csrf_token %}{% include "components/form_errors.html" %}
+{% if open_requests %}
+  <div class="notice warn">{{ person.full_name }} is named on {{ open_requests|length }} open request{{ open_requests|length|pluralize }}. Choose who takes each one over before deactivating.</div>
+  {% for field in form %}{% include "components/field.html" %}{% endfor %}
+{% else %}<p>{{ person.full_name }} has no open requests. They will no longer be able to sign in. Their history stays in the record.</p>{% endif %}
+<div class="btn-row"><button class="btn danger" type="submit">{% if open_requests %}Reassign and deactivate{% else %}Deactivate{% endif %}</button><a class="btn secondary" href="{% url 'admin_area:people' %}">Cancel</a></div></form>
+{% endblock %}

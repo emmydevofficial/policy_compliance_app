@@ -1,0 +1,34 @@
+{% load od %}{% if for_pdf %}<!doctype html><html><head><meta charset="utf-8"><title>Quarterly Compliance Status Report</title>
+<style>
+@page{size:A4;margin:18mm 15mm;@bottom-right{content:"Page " counter(page) " of " counter(pages);font-size:8pt;color:#6B8189}}
+body{font-family:"Source Sans 3",Arial,sans-serif;font-size:9.5pt;color:#0F2429}
+h1{color:#00849E;font-size:18pt}h2{font-size:12pt;border-bottom:2px solid #00849E;padding-bottom:2pt;margin-top:16pt}
+table{border-collapse:collapse;width:100%;margin:6pt 0}th,td{border:1px solid #CFDDE1;padding:3pt 4pt;text-align:left;vertical-align:top}th{background:#E8F0F2}
+.num{text-align:right}.mono{font-family:"IBM Plex Mono",monospace;font-size:8pt}
+</style></head><body>{% endif %}
+<div class="report">
+<h1>Quarterly Compliance Status Report</h1>
+<p>{{ s.period.name }}{% if s.period %} ({{ s.period.start_date|date:"d M Y" }} – {{ s.period.end_date|date:"d M Y" }}){% endif %}. Generated {{ generated|date:"d M Y H:i" }} (Lagos).</p>
+<h2>1. Position summary</h2>
+<table><tbody>
+<tr><th>Active obligations</th><td class="num">{{ s.rows|length }}</td><th>Fully compliant (verified)</th><td class="num">{{ s.overall.compliant }} ({{ s.overall.pct_compliant }}%)</td></tr>
+<tr><th>Overdue</th><td class="num">{{ s.overdue }}</td><th>Awaiting verification</th><td class="num">{{ s.awaiting_verification }}</td></tr>
+<tr><th>Evidence outstanding</th><td class="num">{{ s.overall.outstanding }}</td><th>High risk exposure</th><td class="num">{{ s.high_risk_exposure|length }}</td></tr>
+</tbody></table>
+<table><thead><tr><th>Compliance position</th><th class="num">Obligations</th></tr></thead><tbody>{% for key, label, css, n in s.positions %}<tr><td>{{ label }}</td><td class="num">{{ n }}</td></tr>{% endfor %}</tbody></table>
+<h2>2. Status by instrument</h2>
+<table><thead><tr><th>Instrument</th><th class="num">Total</th><th class="num">Verified</th><th class="num">Compliant</th><th class="num">Submitted</th><th class="num">Outstanding</th><th class="num">Overdue</th><th class="num">N/A</th></tr></thead><tbody>
+{% for b in s.by_instrument %}<tr><td>{{ b.label }}</td><td class="num">{{ b.total }}</td><td class="num">{{ b.verified }}</td><td class="num">{{ b.compliant }}</td><td class="num">{{ b.submitted }}</td><td class="num">{{ b.outstanding }}</td><td class="num">{{ b.overdue }}</td><td class="num">{{ b.closed }}</td></tr>{% endfor %}</tbody></table>
+<h2>3. Status by department</h2>
+<table><thead><tr><th>Department</th><th class="num">Total</th><th class="num">Verified</th><th class="num">% compliant</th><th class="num">Submitted</th><th class="num">Outstanding</th><th class="num">Overdue</th></tr></thead><tbody>
+{% for b in s.by_department %}<tr><td>{{ b.label }}</td><td class="num">{{ b.total }}</td><td class="num">{{ b.verified }}</td><td class="num">{{ b.pct_compliant }}%</td><td class="num">{{ b.submitted }}</td><td class="num">{{ b.outstanding }}</td><td class="num">{{ b.overdue }}</td></tr>{% endfor %}</tbody></table>
+<h2>4. Obligations requiring an action plan</h2>
+<table><thead><tr><th>ID</th><th>Department</th><th>Position</th><th>Action required</th><th>Owner</th><th>Target</th></tr></thead><tbody>
+{% for r in s.action_plans %}<tr><td class="mono">{{ r.ob.obligation_id }}</td><td>{{ r.req.assigned_department.name }}</td><td>{{ r.sub.get_compliance_status_display }}</td><td>{{ r.sub.action_required }}</td><td>{{ r.sub.action_owner }}</td><td>{{ r.sub.target_resolution_date|date:"d M Y" }}</td></tr>
+{% empty %}<tr><td colspan="6">None.</td></tr>{% endfor %}</tbody></table>
+<h2>5. Evidence index</h2>
+<table><thead><tr><th>ID</th><th>File</th><th>Submitted</th><th>By</th><th>SHA-256</th></tr></thead><tbody>
+{% for sub in evidence %}{% for a in sub.attachments.all %}<tr><td class="mono">{{ sub.request.obligation.obligation_id }}</td><td>{{ a.original_filename }}</td><td>{{ sub.submitted_at|date:"d M Y" }}</td><td>{{ sub.submitted_by.full_name }}</td><td class="mono">{{ a.sha256 }}</td></tr>{% endfor %}
+{% empty %}<tr><td colspan="5">No evidence submitted.</td></tr>{% endfor %}</tbody></table>
+</div>
+{% if for_pdf %}</body></html>{% endif %}

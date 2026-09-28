@@ -1,0 +1,11 @@
+# /etc/systemd/system/obligation-desk-notices.service
+[Unit]
+Description=Obligation Desk daily notices
+
+[Service]
+Type=oneshot
+User=obligationdesk
+WorkingDirectory=/srv/obligation-desk/app
+EnvironmentFile=/srv/obligation-desk/app/.env
+Environment=DJANGO_SETTINGS_MODULE=config.settings.prod
+ExecStart=/srv/obligation-desk/app/.venv/bin/python manage.py run_daily_notices

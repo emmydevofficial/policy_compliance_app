@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block title %}Reports and export{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Reports and export</h1><p>{{ period.name|default:"No period" }}. Every export is recorded in the audit log.</p></div>
+<form method="get" class="btn-row"><label for="period" class="visually-hidden">Period</label><select id="period" name="period" style="width:auto">{% for p in periods %}<option value="{{ p.pk }}" {% if p == period %}selected{% endif %}>{{ p.name }}</option>{% endfor %}</select><button class="btn secondary small" type="submit">Show</button></form></div>
+<div class="grid grid-2">
+  <div class="card"><h2>Quarterly Compliance Status Report</h2><p>Position summary, status by instrument and department, action plans and the evidence index.</p>
+    <div class="btn-row"><a class="btn secondary" href="{% url 'reports:preview' %}?period={{ period.pk }}">Preview</a><a class="btn" href="{% url 'reports:report_pdf' %}?period={{ period.pk }}">Download PDF</a></div></div>
+  <div class="card"><h2>Obligation register</h2><p>All active obligations, in the column order of the client workbook.</p><a class="btn" href="{% url 'reports:register_xlsx' %}">Download XLSX</a></div>
+  <div class="card"><h2>Department tracker</h2><p>Current submissions, one sheet per department plus a combined sheet.</p><a class="btn" href="{% url 'reports:tracker_xlsx' %}?period={{ period.pk }}">Download XLSX</a></div>
+  <div class="card"><h2>Submission pack</h2><p>Every verified submission's files, in folders by obligation ID, with a manifest listing SHA-256 hashes.</p><a class="btn" href="{% url 'reports:pack_zip' %}?period={{ period.pk }}">Download ZIP</a></div>
+</div>
+{% endblock %}

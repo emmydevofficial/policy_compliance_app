@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block title %}My obligations{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>My obligations</h1><p>{{ user.department.name }}{% if period %} · {{ period.name }}{% endif %}</p></div></div>
+<div class="stats">
+  <div class="stat bad"><div class="label">Past deadline</div><div class="value">{{ past|length }}</div></div>
+  <div class="stat warn"><div class="label">Still to submit</div><div class="value">{{ todo|length }}</div></div>
+  <div class="stat review"><div class="label">Submitted</div><div class="value">{{ done|length }}</div></div>
+</div>
+{% if past %}<h2>Past deadline</h2>{% for r in past %}{% include "my/_card.html" with css="bad" %}{% endfor %}{% endif %}
+<h2>Still to submit</h2>{% for r in todo %}{% include "my/_card.html" with css="warn" %}{% empty %}<p class="muted">Nothing waiting.</p>{% endfor %}
+<h2>Submitted</h2>{% for r in done %}{% include "my/_card.html" with css="review" %}{% empty %}<p class="muted">Nothing submitted yet this period.</p>{% endfor %}
+{% endblock %}

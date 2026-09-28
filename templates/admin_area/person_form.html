@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}{% if person.pk %}{{ person.full_name }}{% else %}Add person{% endif %}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'admin_area:people' %}">People</a> / {{ person.full_name|default:"New" }}</div>
+<h1>{% if person.pk %}Edit {{ person.full_name }}{% else %}Add person{% endif %}</h1>
+{% if not person.pk %}<p>They will receive an email with a single-use link, valid for 72 hours, to set their own password.</p>{% endif %}
+<form method="post" class="card" style="max-width:640px">{% csrf_token %}{% include "components/form_errors.html" %}
+{% for field in form %}{% include "components/field.html" %}{% endfor %}
+<div class="btn-row"><button class="btn" type="submit">{% if person.pk %}Save{% else %}Add and send invitation{% endif %}</button><a class="btn secondary" href="{% url 'admin_area:people' %}">Cancel</a></div></form>
+{% endblock %}

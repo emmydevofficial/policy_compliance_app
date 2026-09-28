@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}Notification settings{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Notification settings</h1><p>Contact details, the notices you receive, and cover while you are away.</p></div></div>
+<form method="post" class="grid grid-2">{% csrf_token %}
+  <div class="card"><h2>Contact details</h2>{% for field in contact %}{% include "components/field.html" %}{% endfor %}<p class="small muted">Email: {{ user.email }} (ask Regulation &amp; Compliance to change it)</p></div>
+  <div class="card"><h2>Notices</h2>{% for field in prefs %}{% include "components/field.html" %}{% endfor %}
+    <p class="notice small">Deadline reminders for <strong>High risk</strong> obligations are always sent. They cannot be switched off.</p></div>
+  <div class="card"><h2>Delegation</h2><p class="small muted">While you are away, notices are also sent to the person covering for you.</p>{% include "components/form_errors.html" with form=delegation %}{% for field in delegation %}{% include "components/field.html" %}{% endfor %}</div>
+  <div><button class="btn" type="submit">Save settings</button></div>
+</form>
+{% endblock %}

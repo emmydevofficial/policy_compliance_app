@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Submission history{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Submission history</h1><p>Every submission from {{ user.department.name }}.</p></div></div>
+<div class="table-wrap"><table><thead><tr><th>Submitted</th><th>ID</th><th>Period</th><th>Position</th><th>By</th><th>Files</th><th>Outcome</th></tr></thead><tbody>
+{% for s in submissions %}<tr><td class="num">{{ s.submitted_at|date:"d M Y H:i" }}</td><td><a class="oid" href="{% url 'my:submit' s.request_id %}">{{ s.request.obligation.obligation_id }}</a></td><td>{{ s.request.period.name }}</td><td><span class="badge {{ s.compliance_css }}">{{ s.get_compliance_status_display }}</span></td><td>{{ s.submitted_by.full_name }}</td><td>{% with files=s.attachments.all kind="evidence" %}{% include "components/files.html" %}{% endwith %}</td><td>{% if s.verification_outcome %}<span class="badge {% if s.verification_outcome == 'VERIFIED' %}ok{% else %}bad{% endif %}">{{ s.get_verification_outcome_display }}</span>{% if s.verification_comment %}<br><span class="small">{{ s.verification_comment }}</span>{% endif %}{% else %}<span class="badge review">Awaiting verification</span>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="7" class="muted">No submissions yet.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

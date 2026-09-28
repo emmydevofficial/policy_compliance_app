@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% load od %}{% block title %}Executive summary{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Executive summary</h1><p>{{ s.period.name|default:"No open period" }}</p></div>{% include "dashboard/_period.html" %}</div>
+<div class="stats">
+  <div class="stat ok"><div class="label">Fully compliant (verified)</div><div class="value">{{ s.overall.pct_compliant }}%</div></div>
+  <div class="stat bad"><div class="label">High risk exposure</div><div class="value">{{ s.high_risk_exposure|length }}</div></div>
+  <div class="stat warn"><div class="label">Evidence outstanding</div><div class="value">{{ s.overall.outstanding }}</div></div>
+  <div class="stat review"><div class="label">Under review</div><div class="value">{{ s.overall.submitted }}</div></div>
+</div>
+<div class="card"><h2>Licence exposure</h2><p class="small muted">TSP Licence obligations not yet verified as compliant.</p>
+<div class="table-wrap"><table><thead><tr><th>ID</th><th>Reference</th><th>Department</th><th>Risk</th><th>Position</th><th>Consequence of breach</th></tr></thead><tbody>
+{% for r in s.licence_exposure %}<tr><td><a class="oid" href="{% url 'obligations:detail' r.ob.obligation_id %}">{{ r.ob.obligation_id }}</a></td><td>{{ r.ob.document_reference }}</td><td>{{ r.ob.primary_department.name }}</td><td>{% with ob=r.ob %}{% include "components/risk.html" %}{% endwith %}</td><td>{% if r.req %}{% include "components/status.html" with r=r.req %}{% else %}<span class="badge na">No request</span>{% endif %}</td><td class="desc small">{{ r.ob.consequence|truncatechars:140 }}</td></tr>
+{% empty %}<tr><td colspan="6" class="muted">Every licence obligation is verified compliant.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="card"><h2>Department comparison</h2>
+<div class="table-wrap"><table><thead><tr><th>Department</th><th class="num">Obligations</th><th class="num">% compliant</th><th class="num">Outstanding</th><th class="num">Overdue</th><th>Progress</th></tr></thead><tbody>
+{% for b in s.by_department %}<tr><td>{{ b.label }}</td><td class="num">{{ b.total }}</td><td class="num">{{ b.pct_compliant }}%</td><td class="num">{{ b.outstanding }}</td><td class="num">{{ b.overdue }}</td><td style="min-width:120px"><div class="bar" role="img" aria-label="{{ b.pct_compliant }}% compliant"><span class="ok" style="width:{{ b.pct_compliant }}%"></span></div></td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

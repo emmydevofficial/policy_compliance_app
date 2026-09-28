@@ -1,0 +1,50 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="htmx-config" content='{"includeIndicatorStyles":false,"allowEval":false,"allowScriptTags":false}'>
+  <title>{% block title %}Obligation Desk{% endblock %} · Obligation Desk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+3:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'js/app.js' %}"></script>
+  <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  <script src="{% static 'js/alpine.min.js' %}" defer></script>
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+{% block body %}
+<div class="shell" x-data="menu">
+  <aside class="sidebar" id="sidebar" x-bind:class="open ? 'open' : ''">
+    <a class="brand" href="{% url 'home' %}"><span class="brand-mark" aria-hidden="true"></span>Obligation Desk</a>
+    {% if user.is_authenticated %}{% include "components/nav.html" %}{% endif %}
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <button type="button" class="btn secondary small menu-toggle" x-on:click="toggle" aria-controls="sidebar">Menu</button>
+      <div class="who">
+        {% if user.is_authenticated %}
+          Signed in as <strong>{{ user.full_name }}</strong> · {{ user.get_role_display }}{% if user.department %} · {{ user.department.name }}{% endif %}
+        {% endif %}
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="btn secondary small" x-data="themeToggle" x-on:click="cycle" x-text="label">Theme</button>
+        {% if user.is_authenticated %}
+          <a class="btn secondary small" href="{% url 'accounts:password_change' %}">Change password</a>
+          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+            <button class="btn secondary small" type="submit">Sign out</button>
+          </form>
+        {% endif %}
+      </div>
+    </header>
+    <main class="content" id="main">
+      {% if messages %}<ul class="messages">{% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}</ul>{% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}
+</body>
+</html>

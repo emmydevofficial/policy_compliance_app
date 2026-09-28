@@ -1,0 +1,11 @@
+# /etc/systemd/system/obligation-desk-notices.timer
+# 07:55 Lagos time. The command decides what is due at the 08:00 send time.
+[Unit]
+Description=Run Obligation Desk daily notices at 07:55 Lagos time
+
+[Timer]
+OnCalendar=*-*-* 07:55:00 Africa/Lagos
+Persistent=true
+
+[Install]
+WantedBy=timers.target

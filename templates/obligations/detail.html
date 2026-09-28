@@ -1,0 +1,49 @@
+{% extends "base.html" %}{% load od %}{% block title %}{{ ob.obligation_id }}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'obligations:list' %}">Obligation register</a> / {{ ob.obligation_id }}</div>
+<div class="page-head"><div><h1><span class="oid">{{ ob.obligation_id }}</span> · {{ ob.category }}</h1>
+<p>{{ ob.instrument.name }} · {{ ob.document_reference }} · {% include "components/risk.html" %}{% if not ob.is_active %} <span class="badge na">Inactive</span>{% endif %}</p></div>
+{% if current_role == "ADMIN" and not current and ob.is_active and period %}<a class="btn" href="{% url 'requests:create' %}?obligation={{ ob.pk }}">Request evidence</a>{% endif %}</div>
+<div class="grid grid-2">
+  <div>
+    <div class="card"><h2>Regulatory text</h2><div class="regtext">{{ ob.description|linebreaksbr }}</div></div>
+    <div class="card"><h2>Evidence required</h2><ul>{% for e in ob.evidence_items %}<li>{{ e }}</li>{% endfor %}</ul></div>
+    <div class="card"><h2>Consequence of breach</h2><p>{{ ob.consequence }}</p></div>
+  </div>
+  <div>
+    <div class="card"><h2>Details</h2><dl class="meta">
+      <dt>Instrument</dt><dd>{{ ob.instrument.name }}{% if ob.instrument.citation %} ({{ ob.instrument.citation }}){% endif %}</dd>
+      <dt>Reference</dt><dd>{{ ob.document_reference }}</dd>
+      <dt>Type</dt><dd>{{ ob.obligation_type }}</dd>
+      <dt>Frequency</dt><dd>{{ ob.frequency }}</dd>
+      <dt>Deadline / trigger</dt><dd>{{ ob.regulatory_deadline }}</dd>
+      <dt>Primary department</dt><dd>{{ ob.primary_department.name }}</dd>
+      <dt>Supporting</dt><dd>{% for d in ob.supporting_departments.all %}{{ d.name }}{% if not forloop.last %}; {% endif %}{% empty %}None{% endfor %}</dd>
+    </dl></div>
+    <div class="card"><h2>Current request{% if period %} · {{ period.name }}{% endif %}</h2>
+    {% if current %}
+      <dl class="meta">
+        <dt>Status</dt><dd>{% with r=current %}{% include "components/status.html" %}{% endwith %}</dd>
+        <dt>Department</dt><dd>{{ current.assigned_department.name }}{% if current.assigned_officer %} · {{ current.assigned_officer.full_name }}{% endif %}</dd>
+        <dt>Deadline</dt><dd class="mono">{{ current.due_date|date:"D d M Y" }}</dd>
+      </dl>
+      {% if current_role == "ADMIN" %}<p><a href="{% url 'requests:detail' current.pk %}">Open the request</a></p>
+      {% elif current_role == "OFFICER" %}<p><a href="{% url 'my:submit' current.pk %}">Open the request</a></p>{% endif %}
+      {% with files=current.attachments.all kind="request" %}{% if files %}<h3>Documents from Regulation &amp; Compliance</h3>{% include "components/files.html" %}{% endif %}{% endwith %}
+      {% for s in current.submissions.all %}
+        <div class="card" style="background:var(--surface-2)">
+          <p><span class="badge {{ s.compliance_css }}">{{ s.get_compliance_status_display }}</span> {% if s.is_current %}<span class="badge accent">Current</span>{% endif %}
+          {% if s.verification_outcome %}<span class="badge {% if s.verification_outcome == 'VERIFIED' %}ok{% else %}bad{% endif %}">{{ s.get_verification_outcome_display }}</span>{% endif %}</p>
+          <p class="small muted">Submitted {{ s.submitted_at|date:"d M Y H:i" }} by {{ s.submitted_by.full_name }}</p>
+          <p>{{ s.evidence_description }}</p>
+          {% with files=s.attachments.all kind="evidence" %}{% include "components/files.html" %}{% endwith %}
+        </div>
+      {% endfor %}
+    {% else %}<p class="muted">{% if current_role == "OFFICER" %}No request for your department this period.{% else %}No request issued this period.{% endif %}</p>{% endif %}
+    </div>
+    {% if history %}<div class="card"><h2>Earlier periods</h2><ul>{% for r in history %}<li>{{ r.period.name }}: {% include "components/status.html" %}</li>{% endfor %}</ul></div>{% endif %}
+  </div>
+</div>
+<div class="card"><h2>Activity</h2>
+<ul class="timeline">{% for e in trail %}<li><span class="small muted mono">{{ e.occurred_at|date:"d M Y H:i" }}</span> · <strong>{{ e.actor_label }}</strong> · {{ e.action|action_label }}<br>{{ e.detail }}</li>{% empty %}<li class="muted">No activity recorded.</li>{% endfor %}</ul></div>
+{% endblock %}

@@ -1,0 +1,4 @@
+{% load od %}<div class="table-wrap"><table><thead><tr><th>Name</th><th class="num">Total</th><th class="num">Verified</th><th class="num">Submitted</th><th class="num">Outstanding</th><th class="num">Overdue</th><th>Progress</th></tr></thead><tbody>
+{% for b in rows %}<tr><td>{{ b.label }}</td><td class="num">{{ b.total }}</td><td class="num">{{ b.verified }}</td><td class="num">{{ b.submitted }}</td><td class="num">{{ b.outstanding }}</td><td class="num">{{ b.overdue }}</td>
+<td style="min-width:120px"><div class="bar" role="img" aria-label="{{ b.verified }} verified, {{ b.submitted }} submitted, {{ b.overdue }} overdue of {{ b.total }}"><span class="ok" style="width:{{ b.verified|pct:b.total }}%"></span><span class="review" style="width:{{ b.submitted|pct:b.total }}%"></span><span class="bad" style="width:{{ b.overdue|pct:b.total }}%"></span></div></td></tr>{% endfor %}
+</tbody></table></div>

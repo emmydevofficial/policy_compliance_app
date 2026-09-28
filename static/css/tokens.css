@@ -1,0 +1,38 @@
+/* Design tokens, SPEC section 12. Nothing else belongs in this file. */
+:root{
+  --bg:#F2F6F7; --surface:#FFFFFF; --surface-2:#E8F0F2; --surface-3:#DCE7EA;
+  --border:#CFDDE1; --border-strong:#B3C8CE;
+  --ink:#0F2429; --ink-2:#42585F; --ink-3:#6B8189;
+  --accent:#00849E; --accent-bright:#00A9C7; --accent-soft:#DCF0F4;
+  --ok:#1B7F3B;    --ok-soft:#DEF3E3;
+  --warn:#A96400;  --warn-soft:#FBECD5;
+  --bad:#BE2F28;   --bad-soft:#FADEDC;
+  --review:#4F53C4; --review-soft:#E4E5FA;
+  --na:#5E7078;    --na-soft:#E4EBED;
+  --font-head:"Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body:"Source Sans 3", "Segoe UI", Arial, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1417; --surface:#122126; --surface-2:#193036; --surface-3:#213C44;
+    --border:#28454E; --border-strong:#3A5F6A;
+    --ink:#E9F2F4; --ink-2:#A9C0C7; --ink-3:#7D969E;
+    --accent:#2BC5E0; --accent-bright:#54D6EC; --accent-soft:#0E3540;
+    --ok:#4CC96E; --ok-soft:#10331C; --warn:#E9A845; --warn-soft:#3A2A0C;
+    --bad:#F1706A; --bad-soft:#3C1614; --review:#9497F0; --review-soft:#1E1F44;
+    --na:#93A9B0; --na-soft:#1E3037;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1417; --surface:#122126; --surface-2:#193036; --surface-3:#213C44;
+  --border:#28454E; --border-strong:#3A5F6A;
+  --ink:#E9F2F4; --ink-2:#A9C0C7; --ink-3:#7D969E;
+  --accent:#2BC5E0; --accent-bright:#54D6EC; --accent-soft:#0E3540;
+  --ok:#4CC96E; --ok-soft:#10331C; --warn:#E9A845; --warn-soft:#3A2A0C;
+  --bad:#F1706A; --bad-soft:#3C1614; --review:#9497F0; --review-soft:#1E1F44;
+  --na:#93A9B0; --na-soft:#1E3037;
+  color-scheme: dark;
+}

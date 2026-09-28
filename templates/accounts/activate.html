@@ -1,0 +1,8 @@
+{% extends "accounts/auth_base.html" %}{% block title %}Activate your account{% endblock %}
+{% block auth %}
+<h1>Welcome, {{ invitee.full_name }}</h1>
+<p>Choose a password for {{ invitee.email }}. At least 12 characters.</p>
+<form method="post">{% csrf_token %}{% include "components/form_errors.html" %}
+  {% for field in form %}{% include "components/field.html" %}{% endfor %}
+  <button class="btn" type="submit">Activate account</button></form>
+{% endblock %}

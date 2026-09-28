@@ -1,0 +1,11 @@
+{% load od %}
+<article class="req-card {{ css }}">
+  <header><h3><span class="oid">{{ r.obligation.obligation_id }}</span> · {{ r.obligation.document_reference }}</h3>
+  <span>{% include "components/status.html" %} {% with ob=r.obligation %}{% include "components/risk.html" %}{% endwith %}</span></header>
+  <p>{{ r.obligation.description|truncatechars:260 }}</p>
+  <p><strong>Deadline:</strong> <span class="mono">{{ r.due_date|date:"D d M Y" }}</span>{% if r.is_open and r.status != "SUBMITTED" %} · <span class="countdown">{{ r.due_date|countdown }}</span>{% endif %}</p>
+  <p><strong>What to attach:</strong></p><ul>{% for e in r.evidence_required|items %}<li>{{ e }}</li>{% endfor %}</ul>
+  {% with files=r.attachments.all kind="request" %}{% if files %}<p><strong>From Regulation &amp; Compliance:</strong></p>{% include "components/files.html" %}{% endif %}{% endwith %}
+  {% with s=r.current_submission %}{% if s and s.verification_outcome == "RETURNED" and r.status == "RETURNED" %}<div class="notice bad"><strong>Returned:</strong> {{ s.verification_comment }}</div>{% endif %}{% endwith %}
+  <a class="btn {% if r.awaiting_officer %}{% else %}secondary{% endif %}" href="{% url 'my:submit' r.pk %}">{% if r.awaiting_officer %}{% if r.status == "RETURNED" %}Resubmit evidence{% else %}Submit evidence{% endif %}{% else %}View submission{% endif %}</a>
+</article>

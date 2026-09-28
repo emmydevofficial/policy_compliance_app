@@ -1,0 +1,11 @@
+{% autoescape off %}Dear {{ user.full_name }},
+
+An Obligation Desk account has been created for you ({{ user.email }}, {{ user.get_role_display }}{% if user.department %}, {{ user.department.name }}{% endif %}).
+
+Set your password with this link. It works once and expires in {{ hours }} hours:
+
+{{ link }}
+
+If you were not expecting this, you can ignore this email.
+
+Regulation & Compliance{% endautoescape %}

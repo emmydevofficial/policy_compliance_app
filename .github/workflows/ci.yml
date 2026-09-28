@@ -1,0 +1,23 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: sudo apt-get update && sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0
+      - run: pip install -r requirements-dev.txt
+      - run: ruff format --check .
+      - run: ruff check .
+      - run: pytest
+      - name: check --deploy
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-0123456789abcdefghijklmnop
+          ALLOWED_HOSTS: obligationdesk.example.org
+          CSRF_TRUSTED_ORIGINS: https://obligationdesk.example.org
+          EMAIL_HOST: smtp.example.org
+        run: python manage.py check --deploy --fail-level WARNING
+      - run: pip-audit -r requirements.txt

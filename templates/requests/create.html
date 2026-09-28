@@ -1,0 +1,46 @@
+{% extends "base.html" %}{% block title %}New evidence request{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>New evidence request</h1><p>{{ period.name }}. One request per obligation; obligations that already have one are not listed.</p></div></div>
+<div class="grid" style="grid-template-columns:minmax(0,3fr) minmax(280px,2fr)">
+<div>
+<form class="card" method="get" hx-get="{% url 'requests:picker' %}" hx-target="#obligation-checklist" hx-swap="outerHTML" hx-trigger="change" hx-include="#create-form [name=obligations]">
+  <h2><span class="step-num">1</span>Choose obligations</h2>
+  <p class="small muted">Tick individually, or select a whole department, instrument or risk level.</p>
+  <div class="filters">
+    {% with field=picker.pick_department %}{% include "components/field.html" %}{% endwith %}
+    {% with field=picker.pick_instrument %}{% include "components/field.html" %}{% endwith %}
+    {% with field=picker.pick_risk %}{% include "components/field.html" %}{% endwith %}
+    <div><button class="btn secondary" type="submit">Select</button></div>
+  </div>
+</form>
+<form id="create-form" class="card" method="post" enctype="multipart/form-data">{% csrf_token %}
+  {% include "components/form_errors.html" %}
+  {{ form.obligations.errors }}
+  {% include "components/obligation_checklist.html" %}
+  <fieldset style="margin-top:1rem"><legend><span class="step-num">2</span>Department and officer</legend>
+    <div class="field"><label for="{{ form.department.id_for_label }}">{{ form.department.label }}</label>
+      <select name="department" id="{{ form.department.id_for_label }}" hx-get="{% url 'requests:officers' %}" hx-target="#id_officer" hx-swap="innerHTML" hx-trigger="change">
+        <option value="">Each obligation's primary department</option>{% for d in form.fields.department.queryset %}<option value="{{ d.pk }}" {% if form.department.value|stringformat:'s' == d.pk|stringformat:'s' %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select>
+      <div class="help">{{ form.department.help_text }}</div>{{ form.department.errors }}</div>
+    {% with field=form.officer %}{% include "components/field.html" %}{% endwith %}
+  </fieldset>
+  <fieldset><legend><span class="step-num">3</span>What is wanted</legend>
+    {% with field=form.evidence_required %}{% include "components/field.html" %}{% endwith %}
+    {% with field=form.message %}{% include "components/field.html" %}{% endwith %}
+    {% with field=form.files %}{% include "components/field.html" %}{% endwith %}
+  </fieldset>
+  <fieldset><legend><span class="step-num">4</span>Deadline and reminders</legend>
+    {% with field=form.due_date %}{% include "components/field.html" %}{% endwith %}
+    {% with field=form.escalate_gm_after_days %}{% include "components/field.html" %}{% endwith %}
+    <p class="small muted">Reminders follow the <a href="{% url 'admin_area:reminders' %}">reminder rules</a>; the schedule for this deadline is shown in the preview.</p>
+    {% with field=form.issue_now %}{% include "components/field.html" %}{% endwith %}
+  </fieldset>
+  <button class="btn" type="submit">Create requests</button>
+</form>
+</div>
+<aside><div class="card sticky-side"><h2>Email preview</h2>
+  <div hx-post="{% url 'requests:preview' %}" hx-include="#create-form" hx-trigger="load, change from:#create-form, keyup delay:600ms from:#create-form" hx-target="this" hx-swap="innerHTML">
+    {% include "components/email_preview.html" %}
+  </div></div></aside>
+</div>
+{% endblock %}

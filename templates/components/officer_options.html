@@ -1,0 +1,1 @@
+<option value="">Whole department</option>{% for o in officers %}<option value="{{ o.pk }}">{{ o.full_name }}{% if o.is_department_gm %} (GM){% endif %}</option>{% endfor %}

@@ -1,0 +1,10 @@
+<div class="email-preview" aria-live="polite">
+{% if error %}<div class="notice bad">{{ error }}</div>
+{% elif subject %}
+  {% if sample %}<p class="small muted">Rendered with sample data.</p>{% elif count > 1 %}<p class="small muted">Preview for {{ ob.obligation_id }}; {{ count }} obligations chosen, each gets its own email.</p>{% endif %}
+  <p><strong>Subject:</strong> {{ subject }}</p>
+  <pre>{{ body }}</pre>
+  {% if schedule %}<h3 style="margin-top:1rem">Notice schedule</h3>
+  <ul class="small">{% for d, label in schedule %}<li><span class="num">{{ d|date:"D d M Y" }}</span> – {{ label }}</li>{% endfor %}</ul>{% endif %}
+{% else %}<p class="muted">Choose an obligation and a deadline to see the email.</p>{% endif %}
+</div>

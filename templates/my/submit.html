@@ -1,0 +1,44 @@
+{% extends "base.html" %}{% load od %}{% block title %}{{ req.obligation.obligation_id }}{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'my:inbox' %}">My obligations</a> / {{ req.obligation.obligation_id }}</div>
+<div class="page-head"><div><h1><span class="oid">{{ req.obligation.obligation_id }}</span> · {{ req.obligation.document_reference }}</h1>
+<p>{% include "components/status.html" with r=req %} {% with ob=req.obligation %}{% include "components/risk.html" %}{% endwith %} · Deadline <span class="mono">{{ req.due_date|date:"D d M Y" }}</span>{% if req.awaiting_officer %} · {{ req.due_date|countdown }}{% endif %}</p></div></div>
+<div class="grid grid-2">
+<div>
+  <div class="card"><h2>The obligation</h2><div class="regtext">{{ req.obligation.description }}</div>
+  <h3 style="margin-top:1rem">What to attach</h3><ul>{% for e in req.evidence_required|items %}<li>{{ e }}</li>{% endfor %}</ul>
+  {% if req.message %}<h3>Message from Regulation &amp; Compliance</h3><p>{{ req.message|linebreaksbr }}</p>{% endif %}
+  {% with files=req.attachments.all kind="request" %}{% if files %}<h3>Documents</h3>{% include "components/files.html" %}{% endif %}{% endwith %}
+  <h3>Consequence of breach</h3><p>{{ req.obligation.consequence }}</p></div>
+  {% if submissions %}<div class="card"><h2>Earlier submissions</h2>
+  {% for s in submissions %}<div class="card" style="background:var(--surface-2)"><p><span class="badge {{ s.compliance_css }}">{{ s.get_compliance_status_display }}</span>{% if s.verification_outcome %} <span class="badge {% if s.verification_outcome == 'VERIFIED' %}ok{% else %}bad{% endif %}">{{ s.get_verification_outcome_display }}</span>{% endif %}</p>
+  <p class="small muted">{{ s.submitted_at|date:"d M Y H:i" }} by {{ s.submitted_by.full_name }}</p><p>{{ s.evidence_description }}</p>
+  {% with files=s.attachments.all kind="evidence" %}{% include "components/files.html" %}{% endwith %}
+  {% if s.verification_comment %}<p><strong>Regulation &amp; Compliance:</strong> {{ s.verification_comment }}</p>{% endif %}</div>{% endfor %}</div>{% endif %}
+</div>
+<div>
+{% if can_submit %}
+<form class="card" method="post" enctype="multipart/form-data" x-data="submissionForm">{% csrf_token %}
+  <h2>{% if req.status == "RETURNED" %}Resubmit evidence{% else %}Submit evidence{% endif %}</h2>
+  {% include "components/form_errors.html" %}
+  <div class="field"><label for="{{ form.compliance_status.id_for_label }}">{{ form.compliance_status.label }} <span class="muted small">(required)</span></label>
+    <select name="compliance_status" id="{{ form.compliance_status.id_for_label }}" x-on:change="setStatus">{% for v, l in form.fields.compliance_status.choices %}<option value="{{ v }}" {% if form.compliance_status.value == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>{{ form.compliance_status.errors }}</div>
+  <div class="field"><label for="{{ form.evidence_available.id_for_label }}">{{ form.evidence_available.label }} <span class="muted small">(required)</span></label>
+    <select name="evidence_available" id="{{ form.evidence_available.id_for_label }}" x-on:change="setEvidence">{% for v, l in form.fields.evidence_available.choices %}<option value="{{ v }}" {% if form.evidence_available.value == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>{{ form.evidence_available.errors }}</div>
+  {% with field=form.files %}{% include "components/field.html" %}{% endwith %}
+  {% with field=form.evidence_description %}{% include "components/field.html" %}{% endwith %}
+  <p class="small muted" x-show="noEvidence">No evidence: explain why in the description above.</p>
+  <div class="grid grid-2">{% with field=form.date_of_last_review %}{% include "components/field.html" %}{% endwith %}{% with field=form.next_review_due %}{% include "components/field.html" %}{% endwith %}</div>
+  <fieldset x-show="needsPlan"><legend>Action plan (required for partial or non-compliance)</legend>
+    {% with field=form.action_required %}{% include "components/field.html" %}{% endwith %}
+    {% with field=form.action_owner %}{% include "components/field.html" %}{% endwith %}
+    {% with field=form.target_resolution_date %}{% include "components/field.html" %}{% endwith %}
+  </fieldset>
+  {% with field=form.remarks %}{% include "components/field.html" %}{% endwith %}
+  <button class="btn" type="submit">Submit</button>
+</form>
+{% else %}
+<div class="card"><h2>Submission</h2><p class="muted">{% if not req.is_editable %}{{ req.period.name }} is closed; this request is read-only.{% elif req.status == "SUBMITTED" %}Your submission is with Regulation &amp; Compliance for verification.{% elif req.status == "VERIFIED" %}Verified. Nothing more is needed.{% else %}This request is {{ req.get_status_display|lower }}.{% endif %}</p></div>
+{% endif %}
+</div></div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}{% load od %}{% block title %}{{ req.obligation.obligation_id }} request{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'requests:list' %}">Evidence requests</a> / {{ req.obligation.obligation_id }}</div>
+<div class="page-head"><div><h1><span class="oid">{{ req.obligation.obligation_id }}</span> · {{ req.period.name }}</h1>
+<p>{% include "components/status.html" with r=req %} {% with ob=req.obligation %}{% include "components/risk.html" %}{% endwith %} · {{ req.assigned_department.name }}{% if req.assigned_officer %} · {{ req.assigned_officer.full_name }}{% endif %}</p></div>
+<a class="btn secondary" href="{% url 'obligations:detail' req.obligation.obligation_id %}">Obligation</a></div>
+{% if not req.is_editable %}<div class="notice warn">{{ req.period.name }} is closed. This request is read-only for everyone.</div>{% endif %}
+<div class="grid grid-2">
+<div>
+  <div class="card"><h2>Request</h2><dl class="meta">
+    <dt>Deadline</dt><dd class="mono">{{ req.due_date|date:"D d M Y" }}{% if req.is_open %} · {{ req.due_date|countdown }}{% endif %}</dd>
+    <dt>Issued</dt><dd>{{ req.issued_at|date:"d M Y H:i"|default:"Not yet (draft)" }}</dd>
+    <dt>Reminders sent</dt><dd class="num" style="text-align:left">{{ req.reminders_sent }}</dd>
+    <dt>GM escalation</dt><dd>after {{ req.escalate_gm_after_days }} working days{% if req.escalated_to_gm_at %} · sent {{ req.escalated_to_gm_at|date:"d M Y" }}{% endif %}</dd>
+    {% if req.escalated_to_management_at %}<dt>Management</dt><dd>escalated {{ req.escalated_to_management_at|date:"d M Y" }}</dd>{% endif %}
+    {% if req.closed_at %}<dt>Closed</dt><dd>{{ req.closed_at|date:"d M Y H:i" }}</dd>{% endif %}
+    {% if req.closure_justification %}<dt>Justification</dt><dd>{{ req.closure_justification }}</dd>{% endif %}
+  </dl>
+  <h3>Obligation</h3><div class="regtext">{{ req.obligation.description }}</div>
+  <h3 style="margin-top:1rem">Evidence required</h3><ul>{% for e in req.evidence_required|items %}<li>{{ e }}</li>{% endfor %}</ul>
+  {% if req.message %}<h3>Covering message</h3><p>{{ req.message|linebreaksbr }}</p>{% endif %}
+  <h3>Documents attached by Regulation &amp; Compliance</h3>{% with files=req.attachments.all kind="request" %}{% include "components/files.html" %}{% endwith %}
+  </div>
+
+  <div class="card"><h2>Submissions</h2>
+  {% for s in submissions %}
+    <div class="card" style="background:var(--surface-2)">
+      <p><span class="badge {{ s.compliance_css }}">{{ s.get_compliance_status_display }}</span> {% if s.is_current %}<span class="badge accent">Current</span>{% endif %}
+      {% if s.verification_outcome %}<span class="badge {% if s.verification_outcome == 'VERIFIED' %}ok{% else %}bad{% endif %}">{{ s.get_verification_outcome_display }}</span>{% endif %}</p>
+      <p class="small muted">{{ s.submitted_at|date:"d M Y H:i" }} by {{ s.submitted_by.full_name }} · evidence available: {{ s.get_evidence_available_display }}</p>
+      <p>{{ s.evidence_description|linebreaksbr }}</p>
+      {% if s.action_required %}<p><strong>Action plan:</strong> {{ s.action_required }} — {{ s.action_owner }}, by <span class="mono">{{ s.target_resolution_date|date:"d M Y" }}</span></p>{% endif %}
+      {% if s.remarks %}<p><strong>Remarks:</strong> {{ s.remarks }}</p>{% endif %}
+      {% with files=s.attachments.all kind="evidence" %}{% include "components/files.html" %}{% endwith %}
+      {% if s.verification_comment %}<p><strong>{{ s.get_verification_outcome_display }} by {{ s.verified_by.full_name }}:</strong> {{ s.verification_comment }}</p>{% endif %}
+      {% if s.is_current and req.status == "SUBMITTED" and req.is_editable %}
+      <form method="post" action="{% url 'requests:verify' s.pk %}">{% csrf_token %}<input type="hidden" name="next" value="detail">
+        {% with field=verify_form.comment %}{% include "components/field.html" %}{% endwith %}
+        <div class="btn-row"><button class="btn" name="decision" value="verify">Verify</button><button class="btn danger" name="decision" value="return">Return with reason</button></div>
+      </form>{% endif %}
+    </div>
+  {% empty %}<p class="muted">No submission yet.</p>{% endfor %}
+  </div>
+</div>
+<div>
+  {% if req.is_editable %}
+  <div class="card"><h2>Actions</h2>
+    {% if req.status == "DRAFT" %}<form method="post" action="{% url 'requests:issue' req.pk %}">{% csrf_token %}<button class="btn" type="submit">Issue request and notify</button></form>{% endif %}
+    {% if req.is_open %}
+    <details><summary class="btn secondary" style="margin-top:.6rem">Change deadline</summary>
+      <form method="post" action="{% url 'requests:deadline' req.pk %}" class="card">{% csrf_token %}{% for field in deadline_form %}{% include "components/field.html" %}{% endfor %}<button class="btn" type="submit">Change deadline</button></form></details>
+    <details><summary class="btn secondary" style="margin-top:.6rem">Reassign</summary>
+      <form method="post" action="{% url 'requests:reassign' req.pk %}" class="card">{% csrf_token %}{% for field in reassign_form %}{% include "components/field.html" %}{% endfor %}<button class="btn" type="submit">Reassign</button></form></details>
+    <details><summary class="btn secondary" style="margin-top:.6rem">Attach documents</summary>
+      <form method="post" action="{% url 'requests:attach' req.pk %}" enctype="multipart/form-data" class="card">{% csrf_token %}{% for field in attach_form %}{% include "components/field.html" %}{% endfor %}<button class="btn" type="submit">Upload</button></form></details>
+    {% endif %}
+    {% if req.status != "CLOSED_NA" %}
+    <details><summary class="btn danger" style="margin-top:.6rem">Close as not applicable</summary>
+      <form method="post" action="{% url 'requests:close_na' req.pk %}" class="card" data-confirm="Close this request as not applicable?">{% csrf_token %}{% for field in close_form %}{% include "components/field.html" %}{% endfor %}<button class="btn danger" type="submit">Close as not applicable</button></form></details>
+    {% endif %}
+  </div>{% endif %}
+  {% if schedule %}<div class="card"><h2>Notice schedule</h2><p class="small muted">If no submission arrives.</p><ul>{% for d, label in schedule %}<li><span class="mono">{{ d|date:"D d M Y" }}</span> – {{ label }}</li>{% endfor %}</ul></div>{% endif %}
+  <div class="card"><h2>Notices</h2>
+  <div class="table-wrap"><table><thead><tr><th>When</th><th>Kind</th><th>To</th><th>Status</th></tr></thead><tbody>
+  {% for n in outbox %}<tr><td class="num">{{ n.scheduled_for|date:"d M Y H:i" }}</td><td>{{ n.get_kind_display }}</td><td class="small">{{ n.recipient_email }}{% if n.cc_emails %}<br>cc {{ n.cc_emails|join:", " }}{% endif %}</td><td><span class="badge {% if n.status == 'SENT' %}ok{% elif n.status == 'FAILED' %}bad{% elif n.status == 'PENDING' %}warn{% else %}na{% endif %}">{{ n.get_status_display }}</span></td></tr>
+  {% empty %}<tr><td colspan="4" class="muted">No notices yet.</td></tr>{% endfor %}
+  </tbody></table></div></div>
+</div>
+</div>
+{% endblock %}

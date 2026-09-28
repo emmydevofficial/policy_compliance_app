@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block title %}Import people{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{% url 'admin_area:people' %}">People</a> / Import</div>
+<h1>Import people from CSV</h1>
+<p>Upload a CSV. You will see what would change before anything is written. New people are sent an activation link.</p>
+<p class="small muted">Columns: <code>full_name, email, job_title, phone, role, department_code, is_department_gm</code>. Role is ADMIN, OFFICER or EXECUTIVE; is_department_gm is yes or no.</p>
+{% if report %}
+<div class="card"><h2>{% if report.ok %}Dry run: nothing has been written yet{% else %}Problems found: nothing will be written{% endif %}</h2>
+{% if report.errors %}<div class="notice bad"><ul>{% for e in report.errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+<p><strong>{{ report.create|length }}</strong> to create · <strong>{{ report.update|length }}</strong> to update · <strong>{{ report.unchanged|length }}</strong> unchanged</p>
+{% if report.create %}<h3>Create</h3><ul>{% for x in report.create %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+{% if report.update %}<h3>Update</h3><ul>{% for x in report.update %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+{% if report.ok and report.create or report.ok and report.update %}<form method="post">{% csrf_token %}<input type="hidden" name="confirm" value="1"><button class="btn" type="submit">Apply these changes</button></form>{% endif %}
+</div>{% endif %}
+<form method="post" enctype="multipart/form-data" class="card" style="max-width:640px">{% csrf_token %}{% for field in form %}{% include "components/field.html" %}{% endfor %}<button class="btn secondary" type="submit">Check file (dry run)</button></form>
+{% endblock %}

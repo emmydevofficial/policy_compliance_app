@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load od %}{% block title %}Evidence requests{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Evidence requests</h1><p>{{ total }} request{{ total|pluralize }}{% if period %} in {{ period.name }}{% if not period.is_open %} (closed, read-only){% endif %}{% endif %}.</p></div>
+<a class="btn" href="{% url 'requests:create' %}">New request</a></div>
+<form class="card filters" method="get">
+  <div class="field"><label for="p">Period</label><select id="p" name="period">{% for p in periods %}<option value="{{ p.pk }}" {% if p == period %}selected{% endif %}>{{ p.name }}{% if p.is_open %} (open){% endif %}</option>{% endfor %}</select></div>
+  <div class="field"><label for="d">Department</label><select id="d" name="department"><option value="">All departments</option>{% for d in departments %}<option value="{{ d.pk }}" {% if department == d.pk|stringformat:'s' %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select></div>
+  <div><button class="btn secondary" type="submit">Show</button></div>
+</form>
+<div class="stats">{% for g in groups %}<a class="stat {{ g.css }}" href="#{{ g.status }}" style="text-decoration:none;color:inherit"><div class="label">{{ g.label }}</div><div class="value">{{ g.items|length }}</div></a>{% endfor %}</div>
+{% for g in groups %}{% if g.items %}
+<section class="card" id="{{ g.status }}"><h2>{{ g.label }} <span class="muted num">({{ g.items|length }})</span></h2>
+<div class="table-wrap"><table><thead><tr><th>ID</th><th>Obligation</th><th>Department</th><th>Deadline</th><th>Status</th></tr></thead><tbody>
+{% for r in g.items %}<tr><td><a class="oid" href="{% url 'requests:detail' r.pk %}">{{ r.obligation.obligation_id }}</a></td><td class="desc">{{ r.obligation.description|truncatechars:120 }}</td><td>{{ r.assigned_department.name }}{% if r.assigned_officer %}<br><span class="small muted">{{ r.assigned_officer.full_name }}</span>{% endif %}</td><td class="num">{{ r.due_date|date:"d M Y" }}<br><span class="small muted">{% if r.is_open %}{{ r.due_date|countdown }}{% endif %}</span></td><td>{% include "components/status.html" %}</td></tr>{% endfor %}
+</tbody></table></div></section>
+{% endif %}{% endfor %}
+{% endblock %}
