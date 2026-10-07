@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 
 from apps.accounts.views import home
 from apps.auditlog import views as audit_views
@@ -60,6 +60,14 @@ urlpatterns = [
     path("manage/", include(admin_area_patterns)),
     path("django-admin/", admin.site.urls),
 ]
+
+if settings.SERVE_STATIC and not settings.DEBUG:
+    from django.views.static import serve
+
+    # Public by design: CSS, JavaScript and icons only. Evidence files never live here.
+    urlpatterns += [
+        re_path(r"^static/(?P<path>.*)$", serve, {"document_root": settings.STATIC_ROOT})
+    ]
 
 if "debug_toolbar" in settings.INSTALLED_APPS:
     urlpatterns += [path("__debug__/", include("debug_toolbar.urls"))]

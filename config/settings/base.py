@@ -104,6 +104,9 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# Normally nginx serves /static/. SERVE_STATIC=True lets the app serve them itself, for a
+# small demonstration run with gunicorn alone (no nginx). Not for real use.
+SERVE_STATIC = env.bool("SERVE_STATIC", default=False)
 
 # Evidence files. Deliberately no MEDIA_URL route: these files are only ever served through
 # a Django view that performs the object-level permission check (SPEC section 7).
