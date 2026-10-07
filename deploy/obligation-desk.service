@@ -4,7 +4,7 @@ Description=Obligation Desk (gunicorn)
 After=network.target
 
 [Service]
-Type=notify
+Type=simple
 User=obligationdesk
 Group=obligationdesk
 WorkingDirectory=/srv/obligation-desk/app
@@ -14,7 +14,8 @@ ExecStart=/srv/obligation-desk/app/.venv/bin/gunicorn config.wsgi:application \
     --bind unix:/run/obligation-desk/gunicorn.sock --workers 3 --timeout 120 \
     --access-logfile - --error-logfile -
 RuntimeDirectory=obligation-desk
-UMask=0027
+# nginx (in the obligationdesk group) must be able to write to the socket.
+UMask=0007
 Restart=on-failure
 NoNewPrivileges=true
 PrivateTmp=true
