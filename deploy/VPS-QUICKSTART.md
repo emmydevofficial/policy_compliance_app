@@ -24,8 +24,9 @@ You need:
 - The code on GitHub. Run `git push` from your Mac first. The `private/` folder, which holds
   the manual, stays on your Mac.
 
-> **About the demo passwords.** The demo data signs everyone in with the password published
-> in the feature manual. Anyone who has that password and the link can sign in as the Admin.
+> **About the demo passwords.** Every demo user gets the password you put in `DEMO_PASSWORD`
+> in `.env` (step 6). The repository holds no password. If you use the one published in the
+> feature manual, remember it is written there. Anyone who has that password and the link can sign in as the Admin.
 > Share the link only with the people testing, and take the server down when the demo ends
 > (step 12).
 
@@ -128,6 +129,7 @@ USE_X_ACCEL_REDIRECT="True"
 X_ACCEL_PREFIX="/protected/"
 EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL="Obligation Desk <no-reply@example.org>"
+DEMO_PASSWORD="<PASSWORD FOR ALL DEMO USERS>"
 ```
 
 **Option B, IP address only (plain HTTP, demo only):**
@@ -145,6 +147,7 @@ USE_X_ACCEL_REDIRECT="True"
 X_ACCEL_PREFIX="/protected/"
 EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL="Obligation Desk <no-reply@example.org>"
+DEMO_PASSWORD="<PASSWORD FOR ALL DEMO USERS>"
 ```
 
 Notes:
@@ -186,7 +189,8 @@ od-manage seed_demo --force-in-production
 od-manage check --deploy
 ```
 
-- `seed_demo` should end with "Demo data ready." and the request counts.
+- `seed_demo` should end with "Demo data ready." and print the demo password. If you left
+  `DEMO_PASSWORD` empty, it prints a random one: note it down.
 - `check --deploy` should print "no issues" for option A. Option B shows four warnings about
   HTTPS. They are expected and are exactly why option B is for demos only.
 

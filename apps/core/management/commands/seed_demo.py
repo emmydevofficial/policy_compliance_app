@@ -2,8 +2,9 @@
 
     python manage.py seed_demo [--reset] [--force-in-production]
 
-All users get the password <DEMO_PASSWORD>. Refuses to run when DEBUG is False unless
---force-in-production is given.
+Every demo user gets the same password: the DEMO_PASSWORD environment variable, or, when it
+is not set, a random one printed at the end. No password is written in the code. Refuses to
+run when DEBUG is False unless --force-in-production is given.
 """
 
 import json
@@ -39,7 +40,19 @@ from apps.workflow import services as wf
 from apps.workflow.files import REQUEST_TYPES, SUBMISSION_TYPES, validate_upload
 from apps.workflow.models import ComplianceStatus, EvidenceRequest, ReportingPeriod, RequestStatus
 
-DEMO_PASSWORD = "<DEMO_PASSWORD>"
+
+def demo_password() -> tuple[str, bool]:
+    """(password, generated). From DEMO_PASSWORD, else a fresh random one."""
+    import os
+    import secrets
+
+    # .env is loaded into the environment by the settings module (django-environ).
+    configured = os.environ.get("DEMO_PASSWORD", "")
+    if configured:
+        return configured, False
+    return secrets.token_urlsafe(12), True
+
+
 FIRST = [
     "Adaeze",
     "Babatunde",
@@ -127,6 +140,7 @@ class Command(BaseCommand):
             raise CommandError("The database already has data. Use --reset to start again.")
 
         self.rng = random.Random(2026)
+        self.password, self.password_generated = demo_password()
         self.today = timezone.localdate()
         with notices.deferred_sending(), transaction.atomic():
             self.instruments()
@@ -175,7 +189,7 @@ class Command(BaseCommand):
         if not hasattr(self, "_hash"):
             from django.contrib.auth.hashers import make_password
 
-            self._hash = make_password(DEMO_PASSWORD)  # hashing once keeps the seed quick
+            self._hash = make_password(self.password)  # hashing once keeps the seed quick
         user = User.objects.create_user(
             email=email,
             password=None,
@@ -434,7 +448,8 @@ class Command(BaseCommand):
             "Requests by status: " + ", ".join(f"{k} {v}" for k, v in sorted(counts.items()))
         )
         self.stdout.write(f"Outbox rows: {NotificationOutbox.objects.count()}")
-        self.stdout.write(f"Users: {User.objects.count()} (password {DEMO_PASSWORD})")
+        source = "generated for this run" if self.password_generated else "from DEMO_PASSWORD"
+        self.stdout.write(f"Users: {User.objects.count()}. Password ({source}): {self.password}")
         self.stdout.write("  Admin:     gm.regcompliance@example.org")
         self.stdout.write("  GM:        gm.hse@example.org (and gm.<code>@example.org)")
         self.stdout.write("  Officer:   officer.hse@example.org (and officer.<code>@example.org)")

@@ -15,3 +15,9 @@ cache/
 
 # Private documents: the feature manual and its build script (contain demo credentials)
 private/
+# The build specification and the AI coding conventions live in private/.
+# The root CLAUDE.md is only a local pointer to private/CLAUDE.md.
+/CLAUDE.md
+/CLAUDE.local.md
+/SPEC.md
+.claude/

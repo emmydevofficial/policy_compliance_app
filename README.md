@@ -2,8 +2,7 @@
 
 A regulatory compliance obligation register with an evidence request, submission and
 verification workflow, for a Nigerian electricity transmission licensee. Django 5.2, SQLite,
-HTMX and Alpine.js, server-rendered. The specification is `SPEC.md`; code conventions are in
-`CLAUDE.md`.
+HTMX and Alpine.js, server-rendered.
 
 ## Run it locally
 
@@ -16,7 +15,8 @@ cp .env.example .env                    # set SECRET_KEY
 .venv/bin/python manage.py runserver
 ```
 
-Sign in at http://localhost:8000 with password `<DEMO_PASSWORD>`:
+Sign in at http://localhost:8000. The password is `DEMO_PASSWORD` from your `.env`, or, if
+that is not set, the random one `seed_demo` prints at the end.
 
 | Role | Email |
 |---|---|
