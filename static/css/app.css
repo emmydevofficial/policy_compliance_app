@@ -142,3 +142,7 @@ legend{font-family:var(--font-head);font-weight:700;padding:0 .4rem}
 .swatch{border:1px solid var(--border);border-radius:8px;padding:.6rem;font-size:.85rem}
 .report{overflow-x:auto}.report table{min-width:640px}
 details summary{list-style:none;cursor:pointer}details summary::-webkit-details-marker{display:none}
+/* The menu button is for narrow screens only; .btn would otherwise show it. */
+.btn.menu-toggle{display:none}
+@media (max-width:900px){.btn.menu-toggle{display:inline-flex}}
+.oid{white-space:nowrap}

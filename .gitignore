@@ -12,3 +12,6 @@ staticfiles/
 .ruff_cache/
 .DS_Store
 cache/
+
+# Private documents: the feature manual and its build script (contain demo credentials)
+private/
